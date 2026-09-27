@@ -1,0 +1,15 @@
+-- Enabling the replication database and add PublisherDB name here
+use master
+exec sp_replicationdboption @dbname = N'PublisherDB', @optname = N'publish', @value = N'true'
+GO
+--
+exec [PublisherDB].sys.sp_addlogreader_agent @job_login = null, @job_password = null, @publisher_security_mode = 1
+GO
+-- Adding the transactional publication and add PublisherDB name here, PublicationName and Publisher name should be SQL Instance name
+use [PublisherDB]
+exec sp_addpublication @publication = N'PublicationName', @description = N'Transactional publication of database ''PublisherDB'' from Publisher ''VM********''.', @sync_method = N'native', @retention = 0, @allow_push = N'true', @allow_pull = N'true', @allow_anonymous = N'false', @enabled_for_internet = N'false', @snapshot_in_defaultfolder = N'true', @compress_snapshot = N'false', @ftp_port = 21, @ftp_login = N'anonymous', @allow_subscription_copy = N'false', @add_to_active_directory = N'false', @repl_freq = N'continuous', @status = N'active', @independent_agent = N'true', @immediate_sync = N'false', @allow_sync_tran = N'false', @autogen_sync_procs = N'false', @allow_queued_tran = N'false', @allow_dts = N'false', @replicate_ddl = 1, @allow_initialize_from_backup = N'true', @enabled_for_p2p = N'false', @enabled_for_het_sub = N'false'
+GO
+-- Adding the transactional articles
+use [PublisherDB]
+exec sp_addarticle @publication = N'PublicationName', @article = N'allocation_sets', @source_owner = N'dbo', @source_object = N'allocation_sets', @type = N'logbased', @description = N'', @creation_script = N'', @pre_creation_cmd = N'drop', @schema_option = 0x000000000803509F, @identityrangemanagementoption = N'none', @destination_table = N'allocation_sets', @destination_owner = N'dbo', @status = 24, @vertical_partition = N'false', @ins_cmd = N'CALL [sp_MSins_dboallocation_sets]', @del_cmd = N'CALL [sp_MSdel_dboallocation_sets]', @upd_cmd = N'SCALL [sp_MSupd_dboallocation_sets]'
+GO
